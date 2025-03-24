@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.1]
+
+- Updated dependencies
+
 ## [0.0.0]
 
 - Initial release
