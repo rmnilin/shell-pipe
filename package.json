@@ -4,9 +4,9 @@
   "icon": "assets/icon.png",
   "displayName": "Shell Pipe",
   "description": "Pipe to shell and vice versa",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
-    "pnpm": "10.6.5",
+    "pnpm": "10.7.0",
     "vscode": "1.98.2"
   },
   "categories": [
@@ -54,13 +54,13 @@
   },
   "devDependencies": {
     "@types/mocha": "10.0.10",
-    "@types/node": "22.13.13",
+    "@types/node": "22.13.14",
     "@types/vscode": "1.98.0",
     "@typescript-eslint/eslint-plugin": "8.28.0",
     "@typescript-eslint/parser": "8.28.0",
     "@vscode/test-cli": "0.0.10",
     "@vscode/test-electron": "2.4.1",
-    "@vscode/vsce": "3.3.0",
+    "@vscode/vsce": "3.3.1",
     "eslint": "9.23.0",
     "typescript": "5.8.2"
   },
