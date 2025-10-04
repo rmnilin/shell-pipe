@@ -1,24 +1,17 @@
 {
   "publisher": "romanilin",
   "name": "shell-pipe",
-  "icon": "assets/icon.png",
   "displayName": "Shell Pipe",
   "description": "Pipe to shell and vice versa",
-  "version": "0.0.3",
-  "engines": {
-    "pnpm": "10.8.0",
-    "vscode": "^1.99.1"
-  },
+  "version": "0.0.5",
   "categories": [
     "Other"
   ],
+  "license": "GPL-3.0-only",
   "repository": {
     "type": "git",
     "url": "https://github.com/rmnilin/shell-pipe"
   },
-  "license": "GPL-3.0-only",
-  "activationEvents": [],
-  "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
@@ -43,31 +36,20 @@
       }
     }
   },
+  "engines": {
+    "pnpm": "10.18.0",
+    "vscode": "^1.104.0"
+  },
+  "packageManager": "pnpm@10.18.0+sha512.e804f889f1cecc40d572db084eec3e4881739f8dec69c0ff10d2d1beff9a4e309383ba27b5b750059d7f4c149535b6cd0d2cb1ed3aeb739239a4284a68f40cfa",
+  "type": "module",
+  "main": "./build/index.js",
   "scripts": {
-    "vscode:prepublish": "pnpm run compile",
-    "vscode:publish": "vsce package && vsce publish",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "pretest": "pnpm run compile && pnpm run lint",
-    "lint": "eslint src --ext ts",
-    "test": "vscode-test"
+    "build": "tsc -p ./"
   },
   "devDependencies": {
-    "@types/mocha": "10.0.10",
-    "@types/node": "22.14.0",
-    "@types/vscode": "1.99.1",
-    "@typescript-eslint/eslint-plugin": "8.29.1",
-    "@typescript-eslint/parser": "8.29.1",
-    "@vscode/test-cli": "0.0.10",
-    "@vscode/test-electron": "2.5.1",
-    "@vscode/vsce": "3.3.2",
-    "eslint": "9.24.0",
-    "typescript": "5.8.3"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@vscode/vsce-sign",
-      "keytar"
-    ]
+    "@types/node": "24.6.2",
+    "@types/vscode": "1.104.0",
+    "@vscode/vsce": "3.6.2",
+    "typescript": "5.9.3"
   }
 }

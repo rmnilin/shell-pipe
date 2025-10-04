@@ -1,0 +1,6 @@
+onlyBuiltDependencies:
+  - '@vscode/vsce-sign'
+  - keytar
+
+overrides:
+  tar-fs@>=2.0.0 <2.1.4: 2.1.4

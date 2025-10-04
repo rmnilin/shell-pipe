@@ -1,0 +1,69 @@
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+-*'
+permissions:
+  contents: write
+jobs:
+  get-tag-branches:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # 5.0.0
+      - id: get-tag-branches
+        run: |
+          BRANCH="$(git branch --remotes --contains ${{ github.ref }} | sed s/origin\\/// | tr -d '\n')"
+          echo "branches=$BRANCH" >> $GITHUB_OUTPUT
+    outputs:
+      branches: ${{ steps.get-tag-branches.outputs.branches }}
+  release:
+    needs:
+      - get-tag-branches
+    if: contains(${{ needs.get-tag-branches.outputs.branches }}, 'main')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # 5.0.0
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [[ $(echo ${{ github.ref_name }}) == *-* ]]; then
+            echo This is pre-release
+            gh release create ${{ github.ref_name }} --draft --verify-tag --title ${{ github.ref_name }} --prerelease
+          else
+            echo This is release
+            gh release create ${{ github.ref_name }} --draft --verify-tag --title ${{ github.ref_name }}
+          fi
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # 4.1.0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # 5.0.0
+        with:
+          cache: pnpm
+      - run: corepack use pnpm
+      - run: pnpm install
+      - run: pnpm run build
+      - run: echo PACKAGE_NAME=${{ github.event.repository.name }}.vsix >> $GITHUB_ENV
+      - run: |
+          if [[ $(echo ${{ github.ref_name }}) == *-* ]]; then
+            echo This is pre-release
+            pnpm exec vsce package --out $PACKAGE_NAME --pre-release
+          else
+            echo This is release
+            pnpm exec vsce package --out $PACKAGE_NAME
+          fi
+      - env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          if [[ $(echo ${{ github.ref_name }}) == *-* ]]; then
+            echo This is pre-release
+            pnpm exec vsce publish --packagePath $PACKAGE_NAME --pat ${{ secrets.VSCE_PAT }} --pre-release
+          else
+            echo This is release
+            pnpm exec vsce publish --packagePath $PACKAGE_NAME --pat ${{ secrets.VSCE_PAT }}
+          fi
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload ${{ github.ref_name }} $PACKAGE_NAME
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit ${{ github.ref_name }} --draft=false
+      - if: failure()
+        run: gh release delete ${{ github.ref_name }}
