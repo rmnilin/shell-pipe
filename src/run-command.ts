@@ -1,11 +1,10 @@
-import { exec } from "child_process";
+import { exec } from "node:child_process";
 
 import * as vscode from "vscode";
 
-import type { Cache, HistoryItem } from "./cache";
-import { clearHistory } from "./clear-history";
-import { escapeIcons } from "./icons";
-import { Semaphore } from "./semaphore";
+import type { History, HistoryItem } from "./history.js";
+import { iconsEscape } from "./icons.js";
+import { Semaphore } from "./semaphore.js";
 
 function updateQuickPick(
   quickPick: vscode.QuickPick<vscode.QuickPickItem>,
@@ -16,9 +15,9 @@ function updateQuickPick(
 
 function updateQuickPickItems(
   quickPick: vscode.QuickPick<vscode.QuickPickItem>,
-  cache: Cache
+  history: History
 ) {
-  const historyItems = cache.history.map((item) => ({
+  const historyItems = history.items.map((item) => ({
     ...item,
     iconPath: new vscode.ThemeIcon("history"),
     description: item.failed ? "$(warning) Failed last time" : undefined,
@@ -38,7 +37,7 @@ function updateQuickPickItems(
     ],
   }));
 
-  if (quickPick.value === "" || cache.has(quickPick.value)) {
+  if (quickPick.value === "" || history.has(quickPick.value)) {
     updateQuickPick(quickPick, {
       items: historyItems,
     });
@@ -48,7 +47,7 @@ function updateQuickPickItems(
         {
           // @ts-expect-error
           command: quickPick.value,
-          label: escapeIcons(quickPick.value),
+          label: iconsEscape(quickPick.value),
           alwaysShow: true,
           iconPath: new vscode.ThemeIcon("plus"),
         },
@@ -58,12 +57,12 @@ function updateQuickPickItems(
   }
 }
 
-function editDetail(item: HistoryItem, cache: Cache): void {
+function editDetail(historyItem: HistoryItem, history: History): void {
   const inputBox = vscode.window.createInputBox();
 
   Object.assign<typeof inputBox, Partial<typeof inputBox>>(inputBox, {
-    title: `Edit Details of \`${item.label}\``,
-    value: item.detail,
+    title: `Edit Details of \`${historyItem.label}\``,
+    value: historyItem.detail,
     buttons: [vscode.QuickInputButtons.Back],
   });
 
@@ -75,19 +74,19 @@ function editDetail(item: HistoryItem, cache: Cache): void {
 
   inputBox.onDidAccept(() => {
     inputBox.hide();
-    cache.get(item.command)!.detail = inputBox.value;
-    runCommand(cache);
+    history.get(historyItem.command)!.detail = inputBox.value;
+    runCommand(history);
   });
 
   inputBox.onDidHide(() => {
     inputBox.dispose();
-    runCommand(cache);
+    runCommand(history);
   });
 
   inputBox.show();
 }
 
-export async function runCommand(cache: Cache): Promise<void> {
+export async function runCommand(history: History): Promise<void> {
   const quickPick = vscode.window.createQuickPick();
 
   updateQuickPick(quickPick, {
@@ -101,12 +100,12 @@ export async function runCommand(cache: Cache): Promise<void> {
     placeholder: "Select a command or enter a new one",
     matchOnDetail: true,
   });
-  updateQuickPickItems(quickPick, cache);
+  updateQuickPickItems(quickPick, history);
 
   quickPick.onDidTriggerButton((button) => {
     if (button.tooltip === "Clear History") {
-      clearHistory(cache);
-      updateQuickPickItems(quickPick, cache);
+      history.clear();
+      updateQuickPickItems(quickPick, history);
     }
   });
 
@@ -119,18 +118,18 @@ export async function runCommand(cache: Cache): Promise<void> {
         break;
 
       case "Edit":
-        editDetail(event.item as HistoryItem, cache);
+        editDetail(event.item as HistoryItem, history);
         break;
 
       case "Delete":
-        cache.delete(command);
-        updateQuickPickItems(quickPick, cache);
+        history.delete(command);
+        updateQuickPickItems(quickPick, history);
         break;
     }
   });
 
   quickPick.onDidChangeValue((input) => {
-    updateQuickPickItems(quickPick, cache);
+    updateQuickPickItems(quickPick, history);
   });
 
   const command = await new Promise<HistoryItem | null>((resolve) => {
@@ -151,7 +150,7 @@ export async function runCommand(cache: Cache): Promise<void> {
     return;
   }
 
-  cache.add(command);
+  history.add(command);
 
   await vscode.window.withProgress(
     {
@@ -193,7 +192,7 @@ export async function runCommand(cache: Cache): Promise<void> {
 
           await semaphore.acquire();
           await editor.edit((editBuilder) => {
-            editBuilder.replace(editor.selections[i], result);
+            editBuilder.replace(selection, result);
             progress.report({ increment: 100 / editor.selections.length });
           });
           semaphore.release();

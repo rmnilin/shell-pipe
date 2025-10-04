@@ -1,4 +1,4 @@
-import * as vscode from "vscode";
+import type { ExtensionContext } from "vscode";
 
 export interface HistoryItem {
   command: string;
@@ -7,52 +7,53 @@ export interface HistoryItem {
   failed?: boolean;
 }
 
-export class Cache {
-  context: vscode.ExtensionContext;
-  history!: Array<HistoryItem>;
+export class History {
+  private context: ExtensionContext;
+  items: HistoryItem[];
 
-  constructor(context: vscode.ExtensionContext) {
+  constructor(context: ExtensionContext) {
     this.context = context;
+    this.items = [];
     Object.assign(
       this,
       this.context.globalState.get(context.extension.id, {
-        history: [],
+        items: [],
       })
     );
   }
 
-  add(newItem: HistoryItem): void {
-    this.delete(newItem.command);
-    this.history.unshift(newItem);
+  add(item: HistoryItem): void {
+    this.delete(item.command);
+    this.items.unshift(item);
     this.context.globalState.update(this.context.extension.id, {
-      history: this.history,
+      items: this.items,
     });
   }
 
   get(command: string): HistoryItem | undefined {
-    return this.history.find((item) => item.command === command);
+    return this.items.find((item) => item.command === command);
   }
 
   has(command: string): boolean {
-    return this.history.some((item) => item.command === command);
+    return this.items.some((item) => item.command === command);
   }
 
   delete(command: string): void {
-    const deleteIndex = this.history.findIndex(
+    const deleteIndex = this.items.findIndex(
       (item) => item.command === command
     );
     if (deleteIndex !== -1) {
-      this.history.splice(deleteIndex, 1);
+      this.items.splice(deleteIndex, 1);
       this.context.globalState.update(this.context.extension.id, {
-        history: this.history,
+        items: this.items,
       });
     }
   }
 
   clear(): void {
-    Object.assign(this, { history: [] });
+    Object.assign(this, { items: [] });
     this.context.globalState.update(this.context.extension.id, {
-      history: this.history,
+      items: this.items,
     });
   }
 }
