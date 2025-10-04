@@ -6,7 +6,7 @@ export class Semaphore {
     this.count = count;
   }
 
-  public acquire(): Promise<void> {
+  acquire(): Promise<void> {
     return new Promise((resolve) => {
       if (this.count > 0) {
         this.count--;
@@ -17,7 +17,7 @@ export class Semaphore {
     });
   }
 
-  public release(): void {
+  release(): void {
     if (this.tasks.length > 0) {
       const nextTask = this.tasks.shift();
       nextTask && nextTask();

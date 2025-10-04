@@ -1,9 +1,14 @@
 # Changelog
 
+## [0.0.4]
+
+- Updated dependencies
+- Cleaned up project
+
 ## [0.0.3]
 
 - Updated dependencies
-- Fix issue with VSCode versions incompatibility
+- Fixed issue with VSCode versions incompatibility
 
 ## [0.0.2]
 
