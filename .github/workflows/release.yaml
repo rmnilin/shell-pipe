@@ -34,7 +34,7 @@ jobs:
             gh release create ${{ github.ref_name }} --draft --verify-tag --title ${{ github.ref_name }}
           fi
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # 4.1.0
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # 5.0.0
+      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # 6.0.0
         with:
           cache: pnpm
       - run: corepack use pnpm
