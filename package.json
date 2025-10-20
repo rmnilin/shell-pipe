@@ -47,7 +47,7 @@
     "build": "tsc -p ./"
   },
   "devDependencies": {
-    "@types/node": "24.7.0",
+    "@types/node": "24.8.1",
     "@types/vscode": "1.104.0",
     "@vscode/vsce": "3.6.2",
     "typescript": "5.9.3"
